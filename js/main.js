@@ -14,15 +14,21 @@ function setupBinding() {
 }
 
 function createGetterSetter(dataObj, key) {
+    let latestValue;
     Object.defineProperty(dataObj, key, {
         get: function () {
-            return bindData[key];
+            return latestValue;
         },
         set: function (value) {
+            latestValue = value;
             for (let el of elements) {
                 const bindKeyName = el.getAttribute("bind");
                 if (bindKeyName === key) {
-                    el.innerText = value;
+                    if (el.type) {
+                        el.value = value;
+                    } else {
+                        el.innerText = value;
+                    }
                 }
             }
         },
@@ -30,12 +36,12 @@ function createGetterSetter(dataObj, key) {
     });
 }
 
-function printEmailToConsole() {
-    console.log(bindData.email);
+function printEmailToConsole(key) {
+    console.log(bindData[key]);
 }
 
-function clearEmailInput() {
-    bindData.email = "";
+function clearEmailInput(key) {
+    bindData[key] = "";
 }
 
 setupBinding();
