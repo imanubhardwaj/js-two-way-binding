@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>JavaScript</title>
-</head>
-<body>
-    <p><b>Email:</b> <span bind="email"></span></p>
-    <input type="email" id="emailInput" placeholder="Enter Email" bind="email">
-    <button onclick="printEmailToConsole('email')">Log Email</button>
-    <button onclick="clearEmailInput('email')">Clear</button>
-
-    <script type="text/javascript" src="js/main.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JS Data Binding</title>
+  </head>
+  <body>
+    <input data-bind="username" />
+    <input data-bind="username" disabled />
+    <p data-bind="username"></p>
+    <button onclick="clearUsername()">
+      Clear Username
+    </button>
+    <script type="text/javascript" src="main.js"></script>
+  </body>
 </html>
