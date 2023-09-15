@@ -1,47 +1,53 @@
-const elements = document.querySelectorAll("[bind]");
-const bindData = {};
+const data = (() => {
+  // Create a Map to store binding names and associated elements.
+  const bindedElementsMap = new Map();
 
-function setupBinding() {
-    for (let el of elements) {
-        if (el.type) {
-            const bindKeyName = el.getAttribute("bind");
-            createGetterSetter(bindData, bindKeyName);
-            el.onkeyup = function () {
-                bindData[bindKeyName] = this.value;
-            };
-        }
+  // Find all elements with the 'data-bind' attribute.
+  const bindedElements = document.querySelectorAll('[data-bind]');
+
+  // Function to get bind name from element.
+  const getBindNameFromElement = (el) => el.getAttribute('data-bind');
+
+  // Iterate through the found elements.
+  bindedElements.forEach((el) => {
+    const bindName = getBindNameFromElement(el);
+
+    // Initialize an array for the bindName if it doesn't exist in the map.
+    if (!bindedElementsMap.has(bindName)) {
+      bindedElementsMap.set(bindName, []);
     }
-}
 
-function createGetterSetter(dataObj, key) {
-    let latestValue;
-    Object.defineProperty(dataObj, key, {
-        get: function () {
-            return latestValue;
-        },
-        set: function (value) {
-            latestValue = value;
-            for (let el of elements) {
-                const bindKeyName = el.getAttribute("bind");
-                if (bindKeyName === key) {
-                    if (el.type) {
-                        el.value = value;
-                    } else {
-                        el.innerText = value;
-                    }
-                }
-            }
-        },
-        enumerable: true // So that it doesn't appear in Object.keys
+    // Push the element into the array associated with the bindName.
+    bindedElementsMap.get(bindName).push(el);
+
+    // Add an event listener for 'keyup' on the element to update data properties.
+    el.addEventListener('input', function () {
+      data[bindName] = this.value;
     });
-}
+  });
 
-function printEmailToConsole(key) {
-    console.log(bindData[key]);
-}
+  // Define the proxy handler.
+  const bindHandler = {
+    set: function (target, prop, value) {
+      const bindedElements = bindedElementsMap.get(prop) ?? [];
 
-function clearEmailInput(key) {
-    bindData[key] = "";
-}
+      // Update the value of bound elements.
+      bindedElements.forEach((el) => {
+        const prop = el.tagName === 'INPUT' ? 'value' : 'textContent';
+        if (el[prop] !== value) {
+          el[prop] = value;
+        }
+      });
 
-setupBinding();
+      // Reflect the change in the target object.
+      return Reflect.set(...arguments);
+    },
+  };
+
+  // Create a proxy object for data with the defined handler.
+  return new Proxy({}, bindHandler);
+})();
+
+const clearUsername = () => {
+  data.username = '';
+};
